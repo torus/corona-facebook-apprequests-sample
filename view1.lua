@@ -15,31 +15,35 @@ local scene = storyboard.newScene()
 -- 
 -----------------------------------------------------------------------------------------
 
+local sum_text
+
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
 	local group = self.view
 	
-	-- -- create a white background to fill screen
-	-- local bg = display.newRect( 0, 0, display.contentWidth, display.contentHeight )
-	-- bg:setFillColor( 255 )	-- white
+	-- create a white background to fill screen
+	local bg = display.newRect( 0, 0, display.contentWidth, display.contentHeight )
+	bg:setFillColor( 255 )	-- white
 	
-	-- -- create some text
-	-- local title = display.newText( "First View", 0, 0, native.systemFont, 32 )
-	-- title:setTextColor( 0 )	-- black
-	-- title:setReferencePoint( display.CenterReferencePoint )
-	-- title.x = display.contentWidth * 0.5
-	-- title.y = 125
+	-- create some text
+	local title = display.newText( "First View", 0, 0, native.systemFont, 32 )
+	title:setTextColor( 0 )	-- black
+	title:setReferencePoint( display.CenterReferencePoint )
+	title.x = display.contentWidth * 0.5
+	title.y = 125
 	
-	-- local summary = display.newText( "Loaded by the first tab 'onPress' listener\n— specified in the 'tabButtons' table.", 0, 0, 300, 300, native.systemFont, 14 )
-	-- summary:setTextColor( 0 ) -- black
-	-- summary:setReferencePoint( display.CenterReferencePoint )
-	-- summary.x = display.contentWidth * 0.5 + 10
-	-- summary.y = title.y + 215
-	
-	-- -- all objects must be added to group (e.g. self.view)
-	-- group:insert( bg )
-	-- group:insert( title )
-	-- group:insert( summary )
+	local summary = display.newText( "Loaded by the first tab 'onPress' listener\n— specified in the 'tabButtons' table.", 0, 0, 300, 300, native.systemFont, 14 )
+	summary:setTextColor( 0 ) -- black
+	summary:setReferencePoint( display.CenterReferencePoint )
+	summary.x = display.contentWidth * 0.5 + 10
+	summary.y = title.y + 215
+
+	sum_text = summary
+
+	-- all objects must be added to group (e.g. self.view)
+	group:insert( bg )
+	group:insert( title )
+	group:insert( summary )
 
 
 
@@ -50,14 +54,20 @@ function scene:createScene( event )
 
 	-- listener for "fbconnect" events
 	local function listener( event )
+
+	   sum_text.text = sum_text.text .. "\n" .. event.type
+
 	   if ( "session" == event.type ) then
 	      -- upon successful login, request list of friends of the signed in user
 	      if ( "login" == event.phase ) then
-		 facebook.request( "me/friends" )
+		 -- facebook.request( "me/friends" )
+
+		 facebook.showDialog("apprequests",
+				     {message = "You should download this game!"})
 
 		 -- Fetch access token for use in Facebook's API
 		 local access_token = event.token
-		 print( access_token )
+		 -- sum_text.text = access_token
 	      end
 	   elseif ( "request" == event.type ) then
 	      -- event.response is a JSON object from the FB server
@@ -75,6 +85,7 @@ function scene:createScene( event )
 	      end
 	   elseif ( "dialog" == event.type ) then
 	      print( "dialog", event.response )
+	      sum_text.text = sum_text.text .. "\nres: " .. event.response
 	   end
 	end
 

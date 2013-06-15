@@ -60,9 +60,11 @@ function facebook_request_coro(scene, group)
       event = coroutine.yield()
    end
    res = facebook.showDialog("apprequests",
-			     {message = "Help me!"})
+			     {message = "Help Needed!",
+			      title = "Give me money!!",
+			      data = "{stage=123}"})
 
-   print("request", res)
+   print("showDialog", res)
 
    event = coroutine.yield()
    print("event", event.type)
@@ -109,7 +111,7 @@ function scene:enterScene( event )
 	local group = self.view
 
 	-- do nothing
-	print("view1 enterScene")
+	print("view2 enterScene")
 	coroutine.wrap(facebook_request_coro)(scene, group)
 end
 

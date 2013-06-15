@@ -5,6 +5,7 @@
 -----------------------------------------------------------------------------------------
 
 local storyboard = require( "storyboard" )
+local widget = require("widget")
 local scene = storyboard.newScene()
 
 -----------------------------------------------------------------------------------------
@@ -16,6 +17,137 @@ local scene = storyboard.newScene()
 -----------------------------------------------------------------------------------------
 
 local sum_text
+local title_text
+local facebook = require "facebook"
+
+
+function facebook_get_requests_coro(scene, group)
+   print("started")
+
+   local appId = "142151812521022"
+   local coro = coroutine.running()
+
+   print("coro", coro)
+
+   local ret = facebook.login(
+      appId,
+      function(event)
+	 print("resume", event.type)
+	 if coroutine.status(coro) == "normal" then
+	    timer.performWithDelay(1,
+				   function()
+				      local res, err = coroutine.resume(coro, event)
+				      print(res, err)
+				   end
+	    )
+	 else
+	    local res, err = coroutine.resume(coro, event)
+	    print(res, err)
+	 end
+      end,
+      {"publish_stream"})
+
+   print("login", res)
+
+   local event = coroutine.yield()
+
+   print("event", event.type)
+
+   assert(event.type == "session")
+
+   print("event.phase", event.phase)
+
+   while event.phase ~= "login" do
+      print("event.phase", event.phase)
+      event = coroutine.yield()
+   end
+
+   res = facebook.request("me/apprequests")
+
+   event = coroutine.yield()
+   print("event", event.type)
+
+   assert(event.type == "request")
+
+end
+
+
+function create_table()
+   local function tableViewListener( event )
+      local phase = event.phase
+      local row = event.target
+
+      print( event.phase )
+   end
+
+   -- Handle row rendering
+   local function onRowRender( event )
+      local phase = event.phase
+      local row = event.row
+
+      local rowTitle = display.newText( row, "Row " .. row.index, 0, 0, nil, 14 )
+      rowTitle.x = row.x - ( row.contentWidth * 0.5 ) + ( rowTitle.contentWidth * 0.5 )
+      rowTitle.y = row.contentHeight * 0.5
+      rowTitle:setTextColor( 0, 0, 0 )
+   end
+
+   -- Handle touches on the row
+   local function onRowTouch( event )
+      local phase = event.phase
+
+      if "press" == phase then
+	 print( "Touched row:", event.target.index )
+      end
+   end
+
+   local tableView = widget.newTableView
+   {
+      top = 30,
+      left = 20,
+      width = 320, 
+      height = 300,
+      listener = tableViewListener,
+      onRowRender = onRowRender,
+      onRowTouch = onRowTouch,
+   }
+
+   for i = 1, 100 do
+      addItem(tableView)
+   end
+
+   return tableView
+end
+
+function addItem(tableView)
+   local isCategory = false
+   local rowHeight = 40
+   local rowColor = 
+      { 
+	 default = { 255, 255, 255 },
+      }
+   local lineColor = { 220, 220, 220 }
+
+   -- Make some rows categories
+   -- if i == 25 or i == 50 or i == 75 then
+   --    isCategory = true
+   --    rowHeight = 24
+   --    rowColor = 
+   -- 	 { 
+   -- 	    default = { 150, 160, 180, 200 },
+   -- 	 }
+   -- end
+
+   -- Insert the row into the tableView
+   tableView:insertRow
+   {
+      isCategory = isCategory,
+      rowHeight = rowHeight,
+      rowColor = rowColor,
+      lineColor = lineColor,
+   }
+end
+
+
 
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
@@ -38,6 +170,7 @@ function scene:createScene( event )
 	summary.x = display.contentWidth * 0.5 + 10
 	summary.y = title.y + 215
 
+	title_text = title
 	sum_text = summary
 
 	-- all objects must be added to group (e.g. self.view)
@@ -45,61 +178,7 @@ function scene:createScene( event )
 	group:insert( title )
 	group:insert( summary )
 
-
-
-	---------------
-	local facebook = require "facebook"
-
-	print(facebook)
-
-	-- listener for "fbconnect" events
-	local function listener( event )
-
-	   sum_text.text = sum_text.text .. "\n" .. event.type
-
-	   if ( "session" == event.type ) then
-	      -- upon successful login, request list of friends of the signed in user
-	      if ( "login" == event.phase ) then
-		 -- facebook.request( "me/friends" )
-
-		 facebook.showDialog("apprequests",
-				     {message = "You should download this game!"})
-
-		 -- Fetch access token for use in Facebook's API
-		 local access_token = event.token
-		 -- sum_text.text = access_token
-	      end
-	   elseif ( "request" == event.type ) then
-	      -- event.response is a JSON object from the FB server
-	      local response = event.response
-
-	      -- if request succeeds, create a scrolling list of friend names
-	      if ( not event.isError ) then
-		 response = json.decode( event.response )
-
-		 local data = response.data
-		 for i=1,#data do
-		    local name = data[i].name
-		    print( name )
-		 end
-	      end
-	   elseif ( "dialog" == event.type ) then
-	      print( "dialog", event.response )
-	      sum_text.text = sum_text.text .. "\nres: " .. event.response
-	   end
-	end
-
-	-- NOTE: You must provide a valid application id provided from Facebook
-	-- local appId = "142151812521022"
-	-- if ( appId ) then
-	--    facebook.login( appId, listener, {"publish_stream"} )
-	-- else
-	--    local function onComplete( event )
-	--       system.openURL( "http://developers.facebook.com/setup" )
-	--    end
-
-	--    native.showAlert( "Error", "To develop for Facebook Connect, you need to get an application id from Facebook's website.", { "Learn More" }, onComplete )
-	-- end
+	group:insert(create_table())
 end
 
 -- Called immediately after scene has moved onscreen:
@@ -107,6 +186,8 @@ function scene:enterScene( event )
 	local group = self.view
 	
 	-- Do nothing
+	print("view1 enterScene")
+	coroutine.wrap(facebook_get_requests_coro)(scene, group)
 end
 
 -- Called when scene is about to move offscreen:

@@ -19,7 +19,7 @@ local sum_text
 local title_text
 local facebook = require "facebook"
 
-function test_facebook_coro(scene, group)
+function facebook_request_coro(scene, group)
    print("started")
 
    local appId = "142151812521022"
@@ -36,7 +36,8 @@ function test_facebook_coro(scene, group)
 				   function()
 				      local res, err = coroutine.resume(coro, event)
 				      print(res, err)
-	    end)
+				   end
+	    )
 	 else
 	    local res, err = coroutine.resume(coro, event)
 	    print(res, err)
@@ -48,19 +49,25 @@ function test_facebook_coro(scene, group)
 
    local event = coroutine.yield()
 
-   print("event", event)
+   print("event", event.type)
 
    assert(event.type == "session")
 
+   print("event.phase", event.phase)
 
-   res = facebook.request("me/friends")
+   while event.phase ~= "login" do
+      print("event.phase", event.phase)
+      event = coroutine.yield()
+   end
+   res = facebook.showDialog("apprequests",
+			     {message = "Help me!"})
 
    print("request", res)
 
    event = coroutine.yield()
-   print("event", event)
+   print("event", event.type)
 
-   assert(event.type == "request")
+   assert(event.type == "dialog")
 
    local res = event.response
    sum_text.text = res
@@ -95,16 +102,15 @@ function scene:createScene( event )
 	group:insert( bg )
 	group:insert( title )
 	group:insert( summary )
-
-	coroutine.wrap(test_facebook_coro)(scene, group)
 end
 
 -- Called immediately after scene has moved onscreen:
 function scene:enterScene( event )
 	local group = self.view
-	
+
 	-- do nothing
-	
+	print("view1 enterScene")
+	coroutine.wrap(facebook_request_coro)(scene, group)
 end
 
 -- Called when scene is about to move offscreen:

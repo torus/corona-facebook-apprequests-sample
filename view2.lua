@@ -15,6 +15,58 @@ local scene = storyboard.newScene()
 -- 
 -----------------------------------------------------------------------------------------
 
+local sum_text
+local title_text
+local facebook = require "facebook"
+
+function test_facebook_coro(scene, group)
+   print("started")
+
+   local appId = "142151812521022"
+   local coro = coroutine.running()
+
+   print("coro", coro)
+
+   local ret = facebook.login(
+      appId,
+      function(event)
+	 print("resume", event.type)
+	 if coroutine.status(coro) == "normal" then
+	    timer.performWithDelay(1,
+				   function()
+				      local res, err = coroutine.resume(coro, event)
+				      print(res, err)
+	    end)
+	 else
+	    local res, err = coroutine.resume(coro, event)
+	    print(res, err)
+	 end
+      end,
+      {"publish_stream"})
+
+   print("login", res)
+
+   local event = coroutine.yield()
+
+   print("event", event)
+
+   assert(event.type == "session")
+
+
+   res = facebook.request("me/friends")
+
+   print("request", res)
+
+   event = coroutine.yield()
+   print("event", event)
+
+   assert(event.type == "request")
+
+   local res = event.response
+   sum_text.text = res
+end
+
+
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
 	local group = self.view
@@ -35,11 +87,16 @@ function scene:createScene( event )
 	summary:setReferencePoint( display.CenterReferencePoint )
 	summary.x = display.contentWidth * 0.5 + 10
 	summary.y = title.y + 215
+
+	title_text = title
+	sum_text = summary
 	
 	-- all objects must be added to group (e.g. self.view)
 	group:insert( bg )
 	group:insert( title )
 	group:insert( summary )
+
+	coroutine.wrap(test_facebook_coro)(scene, group)
 end
 
 -- Called immediately after scene has moved onscreen:

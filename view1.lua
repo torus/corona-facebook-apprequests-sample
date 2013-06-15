@@ -90,16 +90,16 @@ function scene:createScene( event )
 	end
 
 	-- NOTE: You must provide a valid application id provided from Facebook
-	local appId = "142151812521022"
-	if ( appId ) then
-	   facebook.login( appId, listener, {"publish_stream"} )
-	else
-	   local function onComplete( event )
-	      system.openURL( "http://developers.facebook.com/setup" )
-	   end
+	-- local appId = "142151812521022"
+	-- if ( appId ) then
+	--    facebook.login( appId, listener, {"publish_stream"} )
+	-- else
+	--    local function onComplete( event )
+	--       system.openURL( "http://developers.facebook.com/setup" )
+	--    end
 
-	   native.showAlert( "Error", "To develop for Facebook Connect, you need to get an application id from Facebook's website.", { "Learn More" }, onComplete )
-	end
+	--    native.showAlert( "Error", "To develop for Facebook Connect, you need to get an application id from Facebook's website.", { "Learn More" }, onComplete )
+	-- end
 end
 
 -- Called immediately after scene has moved onscreen:

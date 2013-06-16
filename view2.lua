@@ -33,6 +33,7 @@ function facebook_request_coro(scene, group)
 
    print("showDialog", res)
 
+   -- Wait for the response from the Facebook server
    event = coroutine.yield()
    print("event", event.type)
 
@@ -42,6 +43,11 @@ function facebook_request_coro(scene, group)
    sum_text.text = res
 end
 
+function facebook_send_request(scene, group)
+   coroutine.wrap(facebook_request_coro)(scene, group)
+end
+
+----------------------------------------------------------------------
 
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
@@ -79,7 +85,7 @@ function scene:enterScene( event )
 
 	-- do nothing
 	print("view2 enterScene")
-	coroutine.wrap(facebook_request_coro)(scene, group)
+	facebook_send_request(scene, group)
 end
 
 -- Called when scene is about to move offscreen:

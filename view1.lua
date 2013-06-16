@@ -62,46 +62,11 @@ function facebook_delete_request_coro(req)
 
    fbutil.login_coro()
 
-   -- local appId = "142151812521022"
-   -- local coro = coroutine.running()
-
-   -- print("coro", coro)
-
-   -- local ret = facebook.login(
-   --    appId,
-   --    function(event)
-   -- 	 print("resume", event.type)
-   -- 	 if coroutine.status(coro) == "normal" then
-   -- 	    timer.performWithDelay(1,
-   -- 				   function()
-   -- 				      local res, err = coroutine.resume(coro, event)
-   -- 				      print(res, err)
-   -- 				   end
-   -- 	    )
-   -- 	 else
-   -- 	    local res, err = coroutine.resume(coro, event)
-   -- 	    print(res, err)
-   -- 	 end
-   --    end,
-   --    {"publish_stream"})
-
-   -- print("login", res)
-
-   -- local event = coroutine.yield()
-
-   -- print("event", event.type)
-
-   -- assert(event.type == "session")
-
-   -- print("event.phase", event.phase)
-
-   -- while event.phase ~= "login" do
-   --    print("event.phase", event.phase)
-   --    event = coroutine.yield()
-   -- end
-
+   -- Delete the request
+   -- https://developers.facebook.com/docs/howtos/requests/#delete_requests
    local res = facebook.request(req.id, "DELETE")
 
+   -- Wait for the response
    event = coroutine.yield()
    print("event", event.type)
 
@@ -110,10 +75,9 @@ function facebook_delete_request_coro(req)
    local response = json.decode(event.response)
    print("Deleting request", req.id, "response", response)
 
+   -- Redraw the tableView
    scene:enterScene()
 end
-
-
 
 function delete_request(req)
    coroutine.wrap(facebook_delete_request_coro)(req)
@@ -175,16 +139,6 @@ function addItem(tableView)
       }
    local lineColor = { 220, 220, 220 }
 
-   -- Make some rows categories
-   -- if i == 25 or i == 50 or i == 75 then
-   --    isCategory = true
-   --    rowHeight = 24
-   --    rowColor = 
-   -- 	 { 
-   -- 	    default = { 150, 160, 180, 200 },
-   -- 	 }
-   -- end
-
    -- Insert the row into the tableView
    tableView:insertRow
    {
@@ -195,7 +149,11 @@ function addItem(tableView)
    }
 end
 
+function facebook_get_requests(scene, group)
+   coroutine.wrap(facebook_get_requests_coro)(scene, group)
+end
 
+----------------------------------------------------------------------
 
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
@@ -238,7 +196,7 @@ function scene:enterScene( event )
 	
 	-- Do nothing
 	print("view1 enterScene")
-	coroutine.wrap(facebook_get_requests_coro)(scene, group)
+	facebook_get_requests(scene, group)
 end
 
 -- Called when scene is about to move offscreen:

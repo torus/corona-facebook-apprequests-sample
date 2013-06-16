@@ -1,3 +1,5 @@
+local facebook = require "facebook"
+
 local fbutil = {}
 local appId = "142151812521022"
 
@@ -25,6 +27,22 @@ function fbutil.login_coro()
       {"publish_stream"})
 
    print("login", res)
+
+
+   print("login", res)
+
+   local event = coroutine.yield()
+
+   print("event", event.type)
+
+   assert(event.type == "session")
+
+   print("event.phase", event.phase)
+
+   while event.phase ~= "login" do
+      print("event.phase", event.phase)
+      event = coroutine.yield()
+   end
 end
 
 return fbutil

@@ -73,16 +73,81 @@ function facebook_get_requests_coro(scene, group)
    assert(event.type == "request")
 
    local response = json.decode(event.response)
+   while #request_list > 0 do
+      table.remove(request_list)
+   end
+
    for i, v in ipairs(response.data) do
       table.insert(request_list, v)
    end
 
+   table_view:deleteAllRows()
    for i, v in ipairs(request_list) do
       addItem(table_view)
    end
 
 end
 
+
+function facebook_delete_request_coro(req)
+   print("facebook_delete_request_coro started")
+
+   local appId = "142151812521022"
+   local coro = coroutine.running()
+
+   print("coro", coro)
+
+   local ret = facebook.login(
+      appId,
+      function(event)
+	 print("resume", event.type)
+	 if coroutine.status(coro) == "normal" then
+	    timer.performWithDelay(1,
+				   function()
+				      local res, err = coroutine.resume(coro, event)
+				      print(res, err)
+				   end
+	    )
+	 else
+	    local res, err = coroutine.resume(coro, event)
+	    print(res, err)
+	 end
+      end,
+      {"publish_stream"})
+
+   print("login", res)
+
+   local event = coroutine.yield()
+
+   print("event", event.type)
+
+   assert(event.type == "session")
+
+   print("event.phase", event.phase)
+
+   while event.phase ~= "login" do
+      print("event.phase", event.phase)
+      event = coroutine.yield()
+   end
+
+   res = facebook.request(req.id, "DELETE")
+
+   event = coroutine.yield()
+   print("event", event.type)
+
+   assert(event.type == "request")
+
+   local response = json.decode(event.response)
+   print("Deleting request", req.id, "response", response)
+
+   scene:enterScene()
+end
+
+
+
+function delete_request(req)
+   coroutine.wrap(facebook_delete_request_coro)(req)
+end
 
 function create_table()
    local function tableViewListener( event )
@@ -113,6 +178,8 @@ function create_table()
 
       if "press" == phase then
 	 print( "Touched row:", event.target.index )
+	 print( "id:", requests[event.target.index].id)
+	 delete_request(requests[event.target.index])
       end
    end
 

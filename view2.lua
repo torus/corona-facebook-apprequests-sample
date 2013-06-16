@@ -91,7 +91,7 @@ function scene:createScene( event )
 	title.x = display.contentWidth * 0.5
 	title.y = 125
 	
-	local summary = display.newText( "This app doesn't work on Corona Simulator. Please use the Xcode Simulator or an iOS device", 0, 0, 300, 300, native.systemFont, 14 )
+	local summary = display.newText( "This app doesn't work on the Corona Simulator. Please use the Xcode Simulator or an iOS device", 0, 0, 300, 300, native.systemFont, 14 )
 	summary:setTextColor( 0 ) -- black
 	summary:setReferencePoint( display.CenterReferencePoint )
 	summary.x = display.contentWidth * 0.5 + 10

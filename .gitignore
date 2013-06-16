@@ -1,2 +1,4 @@
 *.ipa
+*.mobileprovision
 testflight_result.json
+deviceids.txt

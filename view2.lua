@@ -26,22 +26,10 @@ function facebook_request_coro(scene, group)
 
    fbutil.login_coro()
 
-   -- local event = coroutine.yield()
-
-   -- print("event", event.type)
-
-   -- assert(event.type == "session")
-
-   -- print("event.phase", event.phase)
-
-   -- while event.phase ~= "login" do
-   --    print("event.phase", event.phase)
-   --    event = coroutine.yield()
-   -- end
-   res = facebook.showDialog("apprequests",
-			     {message = "Help Needed!",
-			      title = "Give me money!!",
-			      data = "{stage=123}"})
+   local res = facebook.showDialog("apprequests",
+				   {message = "Help Needed!",
+				    title = "Give me money!!",
+				    data = "{stage=123}"})
 
    print("showDialog", res)
 

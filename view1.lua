@@ -6,6 +6,8 @@
 
 local storyboard = require( "storyboard" )
 local widget = require("widget")
+local json = require("json")
+
 local scene = storyboard.newScene()
 
 -----------------------------------------------------------------------------------------
@@ -18,6 +20,7 @@ local scene = storyboard.newScene()
 
 local sum_text
 local title_text
+local request_list
 local facebook = require "facebook"
 
 
@@ -69,6 +72,15 @@ function facebook_get_requests_coro(scene, group)
 
    assert(event.type == "request")
 
+   local response = json.decode(event.response)
+   for i, v in ipairs(response.data) do
+      table.insert(request_list, v)
+   end
+
+   for i, v in ipairs(request_list) do
+      addItem(table_view)
+   end
+
 end
 
 
@@ -80,12 +92,16 @@ function create_table()
       print( event.phase )
    end
 
+   local requests = {}
+
    -- Handle row rendering
    local function onRowRender( event )
       local phase = event.phase
       local row = event.row
 
-      local rowTitle = display.newText( row, "Row " .. row.index, 0, 0, nil, 14 )
+      local req = requests[row.index]
+      local text = req.from.name .. " " .. tostring(req.data)
+      local rowTitle = display.newText( row, text, 0, 0, nil, 14 )
       rowTitle.x = row.x - ( row.contentWidth * 0.5 ) + ( rowTitle.contentWidth * 0.5 )
       rowTitle.y = row.contentHeight * 0.5
       rowTitle:setTextColor( 0, 0, 0 )
@@ -100,8 +116,7 @@ function create_table()
       end
    end
 
-   local tableView = widget.newTableView
-   {
+   local tableView = widget.newTableView {
       top = 30,
       left = 20,
       width = 320, 
@@ -111,11 +126,7 @@ function create_table()
       onRowTouch = onRowTouch,
    }
 
-   for i = 1, 100 do
-      addItem(tableView)
-   end
-
-   return tableView
+   return tableView, requests
 end
 
 function addItem(tableView)
@@ -151,6 +162,7 @@ end
 
 -- Called when the scene's view does not exist:
 function scene:createScene( event )
+   print("createScene")
 	local group = self.view
 	
 	-- create a white background to fill screen
@@ -178,7 +190,9 @@ function scene:createScene( event )
 	group:insert( title )
 	group:insert( summary )
 
-	group:insert(create_table())
+	table_view, request_list = create_table()
+
+	group:insert(table_view)
 end
 
 -- Called immediately after scene has moved onscreen:

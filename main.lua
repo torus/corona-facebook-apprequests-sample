@@ -26,8 +26,8 @@ end
 
 -- table to setup buttons
 local tabButtons = {
-	{ label="First", defaultFile = "icon1.png", overFile = "icon1-down.png", width = 32, height = 32, onPress=onFirstView, selected=true },
- 	{ label="Second", defaultFile = "icon2.png", overFile = "icon2-down.png", width = 32, height = 32, onPress=onSecondView },
+	{ label="Received", defaultFile = "icon1.png", overFile = "icon1-down.png", width = 32, height = 32, onPress=onFirstView, selected=true },
+ 	{ label="Send", defaultFile = "icon2.png", overFile = "icon2-down.png", width = 32, height = 32, onPress=onSecondView },
 }
 
 -- create the actual tabBar widget

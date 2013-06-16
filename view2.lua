@@ -85,13 +85,13 @@ function scene:createScene( event )
 	bg:setFillColor( 255 )	-- white
 	
 	-- create some text
-	local title = display.newText( "Second View", 0, 0, native.systemFont, 32 )
+	local title = display.newText( "Warning!", 0, 0, native.systemFont, 32 )
 	title:setTextColor( 0 )	-- black
 	title:setReferencePoint( display.CenterReferencePoint )
 	title.x = display.contentWidth * 0.5
 	title.y = 125
 	
-	local summary = display.newText( "Loaded by the first tab 'onPress' listener\n— specified in the 'tabButtons' table.", 0, 0, 300, 300, native.systemFont, 14 )
+	local summary = display.newText( "This app doesn't work on Corona Simulator. Please use the Xcode Simulator or an iOS device", 0, 0, 300, 300, native.systemFont, 14 )
 	summary:setTextColor( 0 ) -- black
 	summary:setReferencePoint( display.CenterReferencePoint )
 	summary.x = display.contentWidth * 0.5 + 10

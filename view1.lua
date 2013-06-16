@@ -7,6 +7,7 @@
 local storyboard = require( "storyboard" )
 local widget = require("widget")
 local json = require("json")
+local fbutil = require("fbutil")
 
 local scene = storyboard.newScene()
 
@@ -27,28 +28,7 @@ local facebook = require "facebook"
 function facebook_get_requests_coro(scene, group)
    print("started")
 
-   local appId = "142151812521022"
-   local coro = coroutine.running()
-
-   print("coro", coro)
-
-   local ret = facebook.login(
-      appId,
-      function(event)
-	 print("resume", event.type)
-	 if coroutine.status(coro) == "normal" then
-	    timer.performWithDelay(1,
-				   function()
-				      local res, err = coroutine.resume(coro, event)
-				      print(res, err)
-				   end
-	    )
-	 else
-	    local res, err = coroutine.resume(coro, event)
-	    print(res, err)
-	 end
-      end,
-      {"publish_stream"})
+   fbutil.login_coro()
 
    print("login", res)
 

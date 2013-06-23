@@ -28,9 +28,6 @@ function fbutil.login_coro()
 
    print("login", res)
 
-
-   print("login", res)
-
    local event = coroutine.yield()
 
    print("event", event.type)

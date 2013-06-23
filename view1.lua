@@ -83,6 +83,36 @@ function delete_request(req)
    coroutine.wrap(facebook_delete_request_coro)(req)
 end
 
+function facebook_send_request_back_coro(req)
+   print("facebook_send_request_back_coro id", req.id)
+   print("facebook_send_request_back_coro from", req.from.id)
+
+   fbutil.login_coro()
+
+   local res = facebook.showDialog("apprequests",
+				   {message = "Thanks!",
+				    title = "Send back!",
+				    to = req.from.id,
+				    data = "{orig=" .. req.id .. "}"})
+
+   print("showDialog", res)
+
+   -- Wait for the response from the Facebook server
+   event = coroutine.yield()
+   print("event", event.type)
+
+   assert(event.type == "dialog")
+
+   local res = event.response
+   sum_text.text = res
+
+   delete_request(req)
+end
+
+function send_request_back(req)
+   coroutine.wrap(facebook_send_request_back_coro)(req)
+end
+
 function create_table()
    local function tableViewListener( event )
       local phase = event.phase
@@ -104,23 +134,56 @@ function create_table()
       rowTitle.x = row.x - ( row.contentWidth * 0.5 ) + ( rowTitle.contentWidth * 0.5 )
       rowTitle.y = row.contentHeight * 0.5
       rowTitle:setTextColor( 0, 0, 0 )
+
+      local btn = widget.newButton {
+	 left = 150,
+	 top = 0,
+	 width = 100,
+	 height = 30,
+	 label = "Send Back",
+	 fontSize = 12,
+	 onEvent = function(event)
+	    if event.phase == "ended" then
+	       print( "Touched row:", row.index )
+	       print( "id:", requests[row.index].id)
+	       send_request_back(requests[row.index])
+	    end
+	 end
+      }
+      row:insert(btn)
+
+      local closebtn = widget.newButton {
+	 left = 250,
+	 top = 00,
+	 width = 30,
+	 height = 30,
+	 label = "×",
+	 onEvent = function(event)
+	    if event.phase == "ended" then
+	       print( "Delete Row:", row.index )
+	       print( "id:", requests[row.index].id)
+	       delete_request(requests[row.index])
+	    end
+	 end
+      }
+      row:insert(closebtn)
    end
 
    -- Handle touches on the row
-   local function onRowTouch( event )
-      local phase = event.phase
+   -- local function onRowTouch( event )
+   --    local phase = event.phase
 
-      if "press" == phase then
-	 print( "Touched row:", event.target.index )
-	 print( "id:", requests[event.target.index].id)
-	 delete_request(requests[event.target.index])
-      end
-   end
+   --    if "press" == phase then
+   -- 	 print( "Touched row:", event.target.index )
+   -- 	 print( "id:", requests[event.target.index].id)
+   -- 	 delete_request(requests[event.target.index])
+   --    end
+   -- end
 
    local tableView = widget.newTableView {
       top = 30,
       left = 20,
-      width = 320, 
+      width = 280, 
       height = 300,
       listener = tableViewListener,
       onRowRender = onRowRender,

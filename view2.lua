@@ -29,7 +29,7 @@ function facebook_request_coro(scene, group)
    local res = facebook.showDialog("apprequests",
 				   {message = "Help Needed!",
 				    title = "Give me money!!",
-				    data = "{stage=123}"})
+				    data = "{time=" .. os.time() .. "}"})
 
    print("showDialog", res)
 

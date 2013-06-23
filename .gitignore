@@ -2,3 +2,5 @@
 *.mobileprovision
 testflight_result.json
 deviceids.txt
+/TEAM_TOKEN
+/API_TOKEN

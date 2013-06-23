@@ -21,6 +21,10 @@ Gets apprequests via Facebook Graph API and show them in a TableView.
 (view1.lua)
 Delete the apprequest.
 
+### send_request_back(req)
+(view1.lua)
+Shows the "send-back" dialog for a received request.
+
 ### facebook_send_request(scene, group)
 
 (view2.lua)
